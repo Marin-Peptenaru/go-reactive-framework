@@ -2,22 +2,28 @@ package playground
 
 import (
 	"fmt"
-	"reactive-go/events"
+	"reactive-go/behavior"
+	"reactive-go/event"
+	"reactive-go/pubsub"
 )
 
 type TrivialSubscriber struct {
 	name string
-	subscriber events.Subscriber
+	subscriber pubsub.Subscriber
 }
 
 
 func NewTrivialSubscriber(name string) *TrivialSubscriber{
 	return &TrivialSubscriber{
-		name: name, subscriber: events.NewSubscriber(),
+		name: name, subscriber: pubsub.NewSubscriber(),
 	}
 }
 
 func (t *TrivialSubscriber) StartSubscribing(){
-	t.subscriber.OnEvent(events.Event("Trivial"), events.NewBehaviour().OnEvent(
-		func(event interface{}){fmt.Printf("%s %s\n", t.name, event)}))
+
+	b := behavior.New()
+
+	b.OnEvent = func(event interface{}){fmt.Printf("%s %s\n", t.name, event)}
+
+	t.subscriber.OnEvent(event.Event("Trivial"), b)
 }

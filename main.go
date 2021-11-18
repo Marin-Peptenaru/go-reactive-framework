@@ -1,38 +1,15 @@
 package main
 
-import (
-	"fmt"
-	"time"
-)
-
-func producer(ch chan<- int){
-	i := 0
-	for {
-		ch <- i
-		time.Sleep(1 * time.Second)
-		i++
-	}
-}
-
-func consumer(name string, ch <-chan int){
-	for{
-		fmt.Printf("%s : %d\n", name, <-ch)
-	}
-}
-
-
-
-
+import "reactive-go/playground"
 
 func main() {
+	wait := make(chan int)
+	pub := playground.NewTrivialPublisher()
+	sub1 := playground.NewTrivialSubscriber("Sub 1")
+	sub2 := playground.NewTrivialSubscriber("Sub 2")
 
-	ch := make(chan int)
-	wait := make(chan interface{})
-
-	go producer(ch)
-	go consumer("Consumer 1", ch)
-	go consumer("Consumer 2", ch)
-
+	pub.StartPublishing()
+	sub1.StartSubscribing()
+	sub2.StartSubscribing()
 	<-wait
-
 }

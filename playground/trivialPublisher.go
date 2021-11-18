@@ -1,18 +1,19 @@
 package playground
 
 import (
-	"reactive-go/events"
+	"reactive-go/event"
+	"reactive-go/pubsub"
 	"time"
 )
 
 type TrivialPublisher struct {
-	trivialEventPublisher events.Publisher
+	trivialEventPublisher pubsub.Publisher
 }
 
 func NewTrivialPublisher() *TrivialPublisher{
 
 	return &TrivialPublisher{
-		trivialEventPublisher: events.NewPublisher(),
+		trivialEventPublisher: pubsub.NewPublisher(),
 	}
 }
 
@@ -21,7 +22,7 @@ func (t *TrivialPublisher) StartPublishing(){
 		ch := time.Tick(1 * time.Second)
 		for {
 			<- ch
-			t.trivialEventPublisher.ValueEvent(events.Event("Trivial"), "tick")
+			t.trivialEventPublisher.ValueEvent(event.Event("Trivial"), "tick")
 		}
 	}()
 }

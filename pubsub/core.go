@@ -1,7 +1,8 @@
-package events
+package pubsub
 
 import (
 	"context"
+	"fmt"
 	"reactive-go/behavior"
 	"reactive-go/event"
 
@@ -20,11 +21,20 @@ func newEventSource(event event.Event){
 }
 
 func newEventBehaviour(event event.Event, behavior *behavior.Behavior) {
-	eventSource := eventSources[event]
+	eventSource := eventSource(event)
 	
-	if behavior.OnEvent != nil {eventSource.DoOnNext(behavior.OnEvent)}
-	if behavior.OnError != nil {eventSource.DoOnError(behavior.OnError)}
-	if behavior.OnDisposed != nil {eventSource.DoOnCompleted(behavior.OnDisposed)}
+	if behavior.OnEvent != nil {
+		fmt.Println(eventSource != nil)
+		eventSource.DoOnNext(behavior.OnEvent)
+	}
+
+	if behavior.OnError != nil {
+		eventSource.DoOnError(behavior.OnError)
+	}
+
+	if behavior.OnDisposed != nil {
+		eventSource.DoOnCompleted(behavior.OnDisposed)
+	}
 }
 func eventSource(event event.Event) rxgo.Observable {
 	if eventSources[event] == nil {
