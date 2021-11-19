@@ -1,6 +1,8 @@
 package main
 
-import "reactive-go/playground"
+import (
+	"reactive-go/playground"
+)
 
 func main() {
 	wait := make(chan int)
