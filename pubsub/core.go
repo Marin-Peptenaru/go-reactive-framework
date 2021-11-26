@@ -75,15 +75,15 @@ func eventSource(event event.Event, strategy PropagationStrategy) rxgo.Observabl
 	return observables[strategy][event]
 }
 
-func publishEventOccurence(event event.Event, payload interface{}){
+func publishEventOccurence(event event.Event, payload interface{}, strategy PropagationStrategy){
 	go func() {
-		publishChannels[event] <- rxgo.Of(payload)
+		channels[strategy][event] <- rxgo.Of(payload)
 	}()
 }
 
-func publishEventError(event event.Event, err error){
+func publishEventError(event event.Event, err error, strategy PropagationStrategy){
 	go func() {
-		publishChannels[event] <- rxgo.Error(err)
+		channels[strategy][event] <- rxgo.Error(err)
 	}()
 }
 

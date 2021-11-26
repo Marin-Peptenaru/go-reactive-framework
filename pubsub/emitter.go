@@ -3,8 +3,8 @@ package pubsub
 import "reactive-go/event"
 
 type EventEmitter interface {
-	ValueEvent(e event.Event, payload interface{})
-	ErrorEvent(e event.Event, err error)
+	ValueEvent(event.Event, interface{})
+	ErrorEvent(event.Event, error)
 }
 
 type Publisher interface {
@@ -27,10 +27,11 @@ func NewProducer() Producer{
 	return &emitter{strategy: PRODUCE}
 }
 
-func (publisher *emitter) ValueEvent(e event.Event, payload interface{}) {
-	publishEventOccurence(e, payload)
+
+func (em *emitter) ValueEvent(e event.Event, payload interface{}){
+	publishEventOccurence(e, payload, em.strategy )
 }
 
-func (publisher *emitter) ErrorEvent(e event.Event, err error) {
-	publishEventError(e, err)
+func (em * emitter)	ErrorEvent(e event.Event, err error){
+	publishEventError(e, err, em.strategy)
 }
