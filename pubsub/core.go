@@ -9,19 +9,49 @@ import (
 	"github.com/reactivex/rxgo/v2"
 )
 
-var eventSources map[event.Event]rxgo.Observable = make(map[event.Event]rxgo.Observable)
-var eventEmmitters map[event.Event]chan<- rxgo.Item = make(map[event.Event]chan<- rxgo.Item)
+type PropagationStrategy int
+
+// Enum with values used to differentiate between when to create producer observable and when to create publisher observables
+const (
+	PUBLISH PropagationStrategy = iota
+	PRODUCE
+)
+
+// maps of observables and channels for emitting and propagating published events
+var publishers map[event.Event]rxgo.Observable = make(map[event.Event]rxgo.Observable)
+var publishChannels map[event.Event]chan<- rxgo.Item = make(map[event.Event]chan<- rxgo.Item)
 
 
-func newEventSource(event event.Event){
-	eventsChannel := make(chan rxgo.Item, 100)
-	eventEmmitters[event] = eventsChannel
-	eventSources[event] = rxgo.FromChannel(eventsChannel, rxgo.WithPublishStrategy())
-	eventSources[event].Connect(context.TODO())
+// maps of observable and channels for emitting and propagating produced events
+var producers map[event.Event]rxgo.Observable = make(map[event.Event]rxgo.Observable)
+var produceChannels map[event.Event]chan<- rxgo.Item = make(map[event.Event]chan<- rxgo.Item)
+
+
+var observables = map[PropagationStrategy]map[event.Event]rxgo.Observable{
+	PUBLISH: publishers,
+	PRODUCE: producers,
 }
 
-func newEventBehaviour(event event.Event, behavior *behavior.Behavior) {
-	eventSource := eventSource(event)
+var channels = map[PropagationStrategy]map[event.Event]chan<- rxgo.Item{
+	PUBLISH: publishChannels,
+	PRODUCE: produceChannels,
+}
+
+func newEventSource(event event.Event, strategy PropagationStrategy){
+
+	eventsChannel := make(chan rxgo.Item, 100)
+	if strategy == PUBLISH {
+		publishChannels[event] = eventsChannel
+		publishers[event] = rxgo.FromChannel(eventsChannel, rxgo.WithPublishStrategy())
+		publishers[event].Connect(context.TODO())
+	} else if strategy == PRODUCE {
+		produceChannels[event] = eventsChannel
+		producers[event] = rxgo.FromChannel(eventsChannel)
+	}
+}
+
+func newEventBehaviour(event event.Event, behavior *behavior.Behavior, strategy PropagationStrategy) {
+	eventSource := eventSource(event, strategy)
 	
 	if behavior.OnEvent != nil {
 		fmt.Println(eventSource != nil)
@@ -36,22 +66,24 @@ func newEventBehaviour(event event.Event, behavior *behavior.Behavior) {
 		eventSource.DoOnCompleted(behavior.OnDisposed)
 	}
 }
-func eventSource(event event.Event) rxgo.Observable {
-	if eventSources[event] == nil {
-	   newEventSource(event)
+func eventSource(event event.Event, strategy PropagationStrategy) rxgo.Observable {
+	observable := observables[strategy][event]
+
+	if observable == nil {
+	   newEventSource(event, strategy)
 	}
-	return eventSources[event]
+	return observables[strategy][event]
 }
 
-func publishEventOccurence(event event.Event, payload interface{}){
+func publishEventOccurence(event event.Event, payload interface{}, strategy PropagationStrategy){
 	go func() {
-		eventEmmitters[event] <- rxgo.Of(payload)
+		channels[strategy][event] <- rxgo.Of(payload)
 	}()
 }
 
-func publishEventError(event event.Event, err error){
+func publishEventError(event event.Event, err error, strategy PropagationStrategy){
 	go func() {
-		eventEmmitters[event] <- rxgo.Error(err)
+		channels[strategy][event] <- rxgo.Error(err)
 	}()
 }
 

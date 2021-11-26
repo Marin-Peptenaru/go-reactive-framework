@@ -20,9 +20,11 @@ func NewTrivialPublisher() *TrivialPublisher{
 func (t *TrivialPublisher) StartPublishing(){
 	go func(){
 		ch := time.Tick(1 * time.Second)
+		i := 0
 		for {
 			<- ch
-			t.trivialEventPublisher.ValueEvent(event.Event("Trivial"), "tick")
+			i++
+			t.trivialEventPublisher.ValueEvent(event.Event("Trivial"), i)
 		}
 	}()
 }

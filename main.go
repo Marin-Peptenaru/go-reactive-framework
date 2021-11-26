@@ -1,15 +1,17 @@
 package main
 
-import "reactive-go/playground"
+import (
+	"reactive-go/playground"
+)
 
 func main() {
 	wait := make(chan int)
-	pub := playground.NewTrivialPublisher()
-	sub1 := playground.NewTrivialSubscriber("Sub 1")
-	sub2 := playground.NewTrivialSubscriber("Sub 2")
+	pub := playground.NewTrivialProducer()
+	sub1 := playground.NewTrivialConsumer("Con 1")
+	sub2 := playground.NewTrivialConsumer("Con 2")
 
-	pub.StartPublishing()
-	sub1.StartSubscribing()
-	sub2.StartSubscribing()
+	pub.StartProducing()
+	sub1.StartConsuming()
+	sub2.StartConsuming()
 	<-wait
 }
