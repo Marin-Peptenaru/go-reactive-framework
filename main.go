@@ -6,12 +6,12 @@ import (
 
 func main() {
 	wait := make(chan int)
-	pub := playground.NewTrivialProducer()
-	sub1 := playground.NewTrivialConsumer("Con 1")
-	sub2 := playground.NewTrivialConsumer("Con 2")
+	pub := playground.NewTrivialPublisher()
+	sub1 := playground.NewTrivialSubscriber("Con 1")
+	sub2 := playground.NewTrivialSubscriber("Con 2")
 
-	pub.StartProducing()
-	sub1.StartConsuming()
-	sub2.StartConsuming()
+	pub.StartPublishing()
+	sub1.StartSubscribing()
+	sub2.StartSubscribing()
 	<-wait
 }

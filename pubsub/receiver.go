@@ -8,8 +8,8 @@ import (
 )
 
 type EventReceiver interface {
-	GetEventSource(event event.Event) rxgo.Observable
-	OnEvent(event event.Event, behavior *behavior.Behavior)
+	GetEventSource(event event.Event) (rxgo.Observable, error)
+	OnEvent(event event.Event, behavior *behavior.Behavior) error
 }
 
 type Subscriber interface {
@@ -21,22 +21,41 @@ type Consumer interface {
 }
 
 type receiver struct {
-	strategy PropagationStrategy
+	reactive
 }
 
+func (r *receiver) GetEventSource(e event.Event) (rxgo.Observable, error) {
+	if !r.events.Declared(e) {
+		return nil, event.UndeclaredEvent(e)
+	}
 
-func (r *receiver) GetEventSource(event event.Event) rxgo.Observable{
-	return eventSource(event, r.strategy)
+	return eventSource(e, r.strategy), nil
 }
 
-func (r *receiver) OnEvent(event event.Event, behavior *behavior.Behavior){
-	newEventBehaviour(event, behavior, r.strategy);
+func (r *receiver) OnEvent(e event.Event, behavior *behavior.Behavior) error {
+
+	if !r.events.Declared(e) {
+		return event.UndeclaredEvent(e)
+	}
+
+	newEventBehaviour(e, behavior, r.strategy)
+	return nil
 }
 
-func NewSubscriber() Subscriber{
-	return &receiver{strategy: PUBLISH}
+func NewSubscriber(subsribedEvents event.EventSet) Subscriber {
+	return &receiver{
+		reactive: reactive{
+			strategy: PUBLISH,
+			events:   subsribedEvents,
+		},
+	}
 }
 
-func NewConsumer() Consumer {
-	return &receiver{strategy: PRODUCE}
+func NewConsumer(consumedEvents event.EventSet) Consumer {
+	return &receiver{
+		reactive: reactive{
+			strategy: PRODUCE,
+			events:   consumedEvents,
+		},
+	}
 }

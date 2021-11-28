@@ -66,6 +66,7 @@ func newEventBehaviour(event event.Event, behavior *behavior.Behavior, strategy 
 		eventSource.DoOnCompleted(behavior.OnDisposed)
 	}
 }
+
 func eventSource(event event.Event, strategy PropagationStrategy) rxgo.Observable {
 	observable := observables[strategy][event]
 
