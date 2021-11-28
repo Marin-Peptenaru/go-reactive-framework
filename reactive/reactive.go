@@ -1,4 +1,4 @@
-package pubsub
+package reactive
 
 import "reactive-go/event"
 

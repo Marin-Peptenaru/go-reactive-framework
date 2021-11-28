@@ -3,18 +3,18 @@ package playground
 import (
 	"fmt"
 	"reactive-go/event"
-	"reactive-go/pubsub"
+	"reactive-go/reactive"
 	"time"
 )
 
 type TrivialProducer struct {
-	trivialEventProducer pubsub.Producer
+	trivialEventProducer reactive.Producer
 }
 
 func NewTrivialProducer() *TrivialProducer{
 
 	return &TrivialProducer{
-		trivialEventProducer: pubsub.NewProducer(TrivialEventSet),
+		trivialEventProducer: reactive.NewProducer(TrivialEventSet),
 	}
 }
 

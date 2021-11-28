@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"reactive-go/behavior"
 	"reactive-go/event"
-	"reactive-go/pubsub"
+	"reactive-go/reactive"
 )
 
 type TrivialConsumer struct {
 	name string
-	consumer pubsub.Consumer
+	consumer reactive.Consumer
 }
 
 
 func NewTrivialConsumer(name string) *TrivialConsumer{
 	return &TrivialConsumer{
-		name: name, consumer: pubsub.NewConsumer(event.NewEventSet(event.Event("Trivial"))),
+		name: name, consumer: reactive.NewConsumer(event.NewEventSet(event.Event("Trivial"))),
 	}
 }
 
