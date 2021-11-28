@@ -15,7 +15,7 @@ type TrivialConsumer struct {
 
 func NewTrivialConsumer(name string) *TrivialConsumer{
 	return &TrivialConsumer{
-		name: name, consumer: pubsub.NewConsumer(),
+		name: name, consumer: pubsub.NewConsumer(event.NewEventSet(event.Event("Trivial"))),
 	}
 }
 
@@ -25,5 +25,8 @@ func (t *TrivialConsumer) StartConsuming(){
 
 	b.OnEvent = func(event interface{}){fmt.Printf("%s %s\n", t.name, event)}
 
-	t.consumer.OnEvent(event.Event("Trivial"), b)
+	err := t.consumer.OnEvent(event.Event("abc"), b)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }
