@@ -77,12 +77,24 @@ func eventSource(event event.Event, strategy PropagationStrategy) rxgo.Observabl
 }
 
 func publishEventOccurence(event event.Event, payload interface{}, strategy PropagationStrategy){
+	channel := channels[strategy][event]
+
+	if channel == nil {
+	   newEventSource(event, strategy)
+	}
+
 	go func() {
 		channels[strategy][event] <- rxgo.Of(payload)
 	}()
 }
 
 func publishEventError(event event.Event, err error, strategy PropagationStrategy){
+	channel := channels[strategy][event]
+
+	if channel == nil {
+	   newEventSource(event, strategy)
+	}
+
 	go func() {
 		channels[strategy][event] <- rxgo.Error(err)
 	}()
